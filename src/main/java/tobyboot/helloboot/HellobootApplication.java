@@ -26,20 +26,20 @@ public class HellobootApplication {
         TomcatServletWebServerFactory serverF = new TomcatServletWebServerFactory();
         // ServletWebServerFactory를 상속
         WebServer webServer = serverF.getWebServer(servletContext -> {
+            HelloController helloController = new HelloController();
             servletContext.addServlet("front_controller", new HttpServlet() {
                 @Override
                 protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
                     if (req.getRequestURI().equals("/hello") && req.getMethod().equals(RequestMethod.GET.name())) {
-
                         String name = req.getParameter("name");
+                        String ret = helloController.hello(name);
                         // 웹 응답의 3요소
-                        resp.setStatus(HttpStatus.OK.value());
                         resp.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN_VALUE);
-                        resp.getWriter().print("Hello " + name);
+                        resp.getWriter().print(ret);
                     } else {
-						resp.setStatus(HttpStatus.NOT_FOUND.value());
-					}
+                        resp.setStatus(HttpStatus.NOT_FOUND.value());
+                    }
                 }
 //			}).addMapping("/hello"); // 서블릿 지정
             }).addMapping("/*"); // 프론트 컨트롤러로 모든 url 처리
