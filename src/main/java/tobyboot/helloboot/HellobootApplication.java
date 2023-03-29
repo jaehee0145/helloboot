@@ -7,6 +7,8 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.context.support.GenericWebApplicationContext;
+import org.springframework.web.servlet.DispatcherServlet;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -19,7 +21,7 @@ public class HellobootApplication {
 
     public static void main(String[] args) {
 
-        GenericApplicationContext applicationContext = new GenericApplicationContext();
+        GenericWebApplicationContext applicationContext = new GenericWebApplicationContext();
         // 어떤 클래스로 빈을 생성할지 메타 정보 전달
         applicationContext.registerBean(HelloController.class);
         // 컨테이너가 제공하는 DI
@@ -28,27 +30,12 @@ public class HellobootApplication {
         applicationContext.registerBean(SimpleHelloService.class);
         applicationContext.refresh();
 
-        // 서블릿 컨테이너 띄우기
         TomcatServletWebServerFactory serverF = new TomcatServletWebServerFactory();
         // ServletWebServerFactory를 상속
         WebServer webServer = serverF.getWebServer(servletContext -> {
-            servletContext.addServlet("front_controller", new HttpServlet() {
-                @Override
-                protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-
-                    if (req.getRequestURI().equals("/hello") && req.getMethod().equals(RequestMethod.GET.name())) {
-                        String name = req.getParameter("name");
-                        HelloController helloController = applicationContext.getBean(HelloController.class);
-                        String ret = helloController.hello(name);
-                        // 웹 응답의 3요소
-                        resp.setContentType(MediaType.TEXT_PLAIN_VALUE);
-                        resp.getWriter().print(ret);
-                    } else {
-                        resp.setStatus(HttpStatus.NOT_FOUND.value());
-                    }
-                }
-//			}).addMapping("/hello"); // 서블릿 지정
-            }).addMapping("/*"); // 프론트 컨트롤러로 모든 url 처리
+            servletContext.addServlet("dispatcher_servlet",
+                    new DispatcherServlet(applicationContext)
+            ).addMapping("/*"); // 프론트 컨트롤러로 모든 url 처리
 
         });
         webServer.start();
