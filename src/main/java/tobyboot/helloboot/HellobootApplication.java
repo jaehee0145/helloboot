@@ -19,7 +19,7 @@ public class HellobootApplication {
                 WebServer webServer = serverF.getWebServer(servletContext -> {
                     servletContext.addServlet("dispatcher_servlet",
                             new DispatcherServlet(this)
-                    ).addMapping("/*"); // 프론트 컨트롤러로 모든 url 처리
+                    ).addMapping("/*");
 
                 });
                 webServer.start();
