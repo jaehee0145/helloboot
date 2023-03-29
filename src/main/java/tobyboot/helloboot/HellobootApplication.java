@@ -11,19 +11,23 @@ public class HellobootApplication {
 
     public static void main(String[] args) {
 
-        GenericWebApplicationContext applicationContext = new GenericWebApplicationContext();
+        GenericWebApplicationContext applicationContext = new GenericWebApplicationContext() {
+            @Override
+            protected void onRefresh() {
+                super.onRefresh();
+                TomcatServletWebServerFactory serverF = new TomcatServletWebServerFactory();
+                WebServer webServer = serverF.getWebServer(servletContext -> {
+                    servletContext.addServlet("dispatcher_servlet",
+                            new DispatcherServlet(this)
+                    ).addMapping("/*"); // 프론트 컨트롤러로 모든 url 처리
+
+                });
+                webServer.start();
+            }
+        };
         applicationContext.registerBean(HelloController.class);
         applicationContext.registerBean(SimpleHelloService.class);
         applicationContext.refresh();
-
-        TomcatServletWebServerFactory serverF = new TomcatServletWebServerFactory();
-        WebServer webServer = serverF.getWebServer(servletContext -> {
-            servletContext.addServlet("dispatcher_servlet",
-                    new DispatcherServlet(applicationContext)
-            ).addMapping("/*"); // 프론트 컨트롤러로 모든 url 처리
-
-        });
-        webServer.start();
     }
 
 
