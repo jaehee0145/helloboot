@@ -22,16 +22,11 @@ public class HellobootApplication {
     public static void main(String[] args) {
 
         GenericWebApplicationContext applicationContext = new GenericWebApplicationContext();
-        // 어떤 클래스로 빈을 생성할지 메타 정보 전달
         applicationContext.registerBean(HelloController.class);
-        // 컨테이너가 제공하는 DI
-        // 인터페이스를 둬서 코드 레벨의 의존 관계를 제거
-        // 주입을 통해서 연관관계 생성
         applicationContext.registerBean(SimpleHelloService.class);
         applicationContext.refresh();
 
         TomcatServletWebServerFactory serverF = new TomcatServletWebServerFactory();
-        // ServletWebServerFactory를 상속
         WebServer webServer = serverF.getWebServer(servletContext -> {
             servletContext.addServlet("dispatcher_servlet",
                     new DispatcherServlet(applicationContext)
@@ -39,13 +34,6 @@ public class HellobootApplication {
 
         });
         webServer.start();
-
-        // 프론트 컨트롤러
-        // 기본적인 서블릿의 한계
-        // 여러개의 서블릿을 각각의 url에 매핑하는데 대부분의 서블릿에서 필요한 코드가 각 서블릿에 중복됨
-        // req, res를 처리하는 것이 부자연스럽다?
-        // 공통적인 부분을 프론트 컨트롤러에서 처리하자는 의미
-        // 인증, 보안, 다국어처리 등을 프런트 컨트롤러에서
     }
 
 
