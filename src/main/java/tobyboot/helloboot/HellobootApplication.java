@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.server.WebServer;
 import org.springframework.boot.web.servlet.ServletContextInitializer;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -22,20 +23,26 @@ import java.io.IOException;
 public class HellobootApplication {
 
     public static void main(String[] args) {
+
+        GenericApplicationContext applicationContext = new GenericApplicationContext();
+        // 어떤 클래스로 빈을 생성할지 메타 정보 전달
+        applicationContext.registerBean(HelloController.class);
+        applicationContext.refresh();
+
         // 서블릿 컨테이너 띄우기
         TomcatServletWebServerFactory serverF = new TomcatServletWebServerFactory();
         // ServletWebServerFactory를 상속
         WebServer webServer = serverF.getWebServer(servletContext -> {
-            HelloController helloController = new HelloController();
             servletContext.addServlet("front_controller", new HttpServlet() {
                 @Override
                 protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
                     if (req.getRequestURI().equals("/hello") && req.getMethod().equals(RequestMethod.GET.name())) {
                         String name = req.getParameter("name");
+                        HelloController helloController = applicationContext.getBean(HelloController.class);
                         String ret = helloController.hello(name);
                         // 웹 응답의 3요소
-                        resp.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN_VALUE);
+                        resp.setContentType(MediaType.TEXT_PLAIN_VALUE);
                         resp.getWriter().print(ret);
                     } else {
                         resp.setStatus(HttpStatus.NOT_FOUND.value());
