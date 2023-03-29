@@ -22,6 +22,10 @@ public class HellobootApplication {
         GenericApplicationContext applicationContext = new GenericApplicationContext();
         // 어떤 클래스로 빈을 생성할지 메타 정보 전달
         applicationContext.registerBean(HelloController.class);
+        // 컨테이너가 제공하는 DI
+        // 인터페이스를 둬서 코드 레벨의 의존 관계를 제거
+        // 주입을 통해서 연관관계 생성
+        applicationContext.registerBean(SimpleHelloService.class);
         applicationContext.refresh();
 
         // 서블릿 컨테이너 띄우기
