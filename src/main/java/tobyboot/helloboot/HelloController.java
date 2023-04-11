@@ -22,6 +22,7 @@ public class HelloController {
     @ResponseBody   // dispatcher servlet에서는 string이 리턴되는 경우에 해당 이름의 뷰를 찾는다.
                     // @RestController를 사용하면 @ResponseBody가 적용된다.
     public String hello(String name) {
+        System.out.println("name: " + name);
         return helloService.sayHello(Objects.requireNonNull(name));
     }
 }
